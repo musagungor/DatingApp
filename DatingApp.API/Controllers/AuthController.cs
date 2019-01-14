@@ -51,6 +51,9 @@ namespace DatingApp.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> LoginAsync(UserForLoginDto userForLoginDto)
         {
+
+            throw new Exception("Hatalı bişiler oldu...");
+
             var userFromRepo = await _repository.LoginAsync(userForLoginDto.Username.ToLower(), userForLoginDto.Password);
 
             if (userFromRepo == null)
