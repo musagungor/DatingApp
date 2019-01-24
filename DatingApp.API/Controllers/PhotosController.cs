@@ -41,16 +41,17 @@ namespace DatingApp.API.Controllers
             _cloudinary = new Cloudinary(acc);
         }
 
-        [HttpGet("{id}",Name="GetPhoto")]
-        public async Task<IActionResult> GetPhotoAsync(int id){
-                var  photoFromRepo = await _repository.GetPhotoAsync(id);
-                var photo = _mapper.Map<PhotoForReturnDto>(photoFromRepo);
+        [HttpGet("{id}", Name = "GetPhoto")]
+        public async Task<IActionResult> GetPhotoAsync(int id)
+        {
+            var photoFromRepo = await _repository.GetPhotoAsync(id);
+            var photo = _mapper.Map<PhotoForReturnDto>(photoFromRepo);
 
-                return Ok(photo);
+            return Ok(photo);
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddPhotoForUserAsync(int userId,[FromForm]PhotoForCreationDto photoForCreationDto)
+        public async Task<IActionResult> AddPhotoForUserAsync(int userId, [FromForm]PhotoForCreationDto photoForCreationDto)
         {
 
             if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
@@ -62,42 +63,83 @@ namespace DatingApp.API.Controllers
 
             var file = photoForCreationDto.File;
 
-            var uploadResult = new  ImageUploadResult();
+            var uploadResult = new ImageUploadResult();
 
-            if (file.Length>0)
+            if (file.Length > 0)
             {
                 using (var stream = file.OpenReadStream())
                 {
-                    var uploadParams = new ImageUploadParams(){
-                        File= new FileDescription(file.Name,stream),
-                        Transformation= new Transformation().Width(500).Height(500).Crop("fill").Gravity("face")                        
+                    var uploadParams = new ImageUploadParams()
+                    {
+                        File = new FileDescription(file.Name, stream),
+                        Transformation = new Transformation().Width(500).Height(500).Crop("fill").Gravity("face")
                     };
 
                     uploadResult = _cloudinary.Upload(uploadParams);
                 }
             }
 
-            photoForCreationDto.Url=uploadResult.Uri.ToString();
+            photoForCreationDto.Url = uploadResult.Uri.ToString();
             photoForCreationDto.PublicId = uploadResult.PublicId;
 
             var photo = _mapper.Map<Photo>(photoForCreationDto);
 
-            if (!userFromRepo.Photos.Any(p=> p.IsMain))
+            if (!userFromRepo.Photos.Any(p => p.IsMain))
             {
                 photo.IsMain = true;
             }
 
-            userFromRepo.Photos.Add(photo);            
+            userFromRepo.Photos.Add(photo);
 
             if (await _repository.SaveAllAsync())
             {
                 var photoToReturn = _mapper.Map<PhotoForReturnDto>(photo);
-                return CreatedAtRoute("GetPhoto", new {id = photo.Id}, photoToReturn);
+                return CreatedAtRoute("GetPhoto", new { id = photo.Id }, photoToReturn);
             }
 
             return BadRequest("Could not add the photo");
 
-        } 
+        }
+
+        [HttpPost("{id}/setMain")]
+        public async Task<IActionResult> SetMainPhoto(int userId, int id)
+        {
+            if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+            {
+                return Unauthorized();
+            }
+
+            var user = await _repository.GetUserAsync(userId);
+
+            if (!user.Photos.Any(p=>p.Id==id))
+            {
+                return Unauthorized();
+            }
+
+            var photoFromRepo = await _repository.GetPhotoAsync(id);
+
+            if (photoFromRepo.IsMain)
+            {
+                return BadRequest("This is allready main photo");
+            }
+
+            var currentMainPhoto = await _repository.GetMainPhotoForUserAsync(userId);
+            currentMainPhoto.IsMain=false;
+           
+            photoFromRepo.IsMain=true;
+
+            if (await _repository.SaveAllAsync())
+            {
+                return NoContent();
+            }
+
+            return BadRequest("Could not set photo to main");
+
+
+
+
+
+        }
 
     }
 }

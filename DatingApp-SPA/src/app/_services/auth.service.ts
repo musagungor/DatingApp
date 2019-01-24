@@ -1,3 +1,4 @@
+import { User } from './../_models/user';
 import { environment } from './../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
@@ -12,6 +13,7 @@ export class AuthService {
   baseUrl = environment.apiUrl + 'auth/';
   jwtHelper = new JwtHelperService();
   decodedToken: any;
+  currentUser: User;
 
   constructor(private http: HttpClient) {}
 
@@ -22,8 +24,9 @@ export class AuthService {
             const user = response;
             if (user) {
               localStorage.setItem('token', user.token);
+              localStorage.setItem('user', JSON.stringify(user.user))
               this.decodedToken = this.jwtHelper.decodeToken(user.token);
-              console.log(this.decodedToken);
+              this.currentUser = user.user;
             }
           }
         )
