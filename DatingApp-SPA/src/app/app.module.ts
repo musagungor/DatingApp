@@ -11,7 +11,7 @@ import { BsDropdownModule, TabsModule } from 'ngx-bootstrap';
 
 import { ErrorInterceptorProvider } from './_services/error.interceptor';
 
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { HomeComponent } from './home/home.component';
 import { HttpClientModule} from '@angular/common/http';
@@ -62,6 +62,7 @@ export function tokenGetter() {
       BrowserModule,
       HttpClientModule,
       FormsModule,
+      ReactiveFormsModule,
       BsDropdownModule.forRoot(),
       TabsModule.forRoot(),
       RouterModule.forRoot(appRoutes),
