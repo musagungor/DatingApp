@@ -17,7 +17,7 @@ export class RegisterComponent implements OnInit {
   model: any = {};
   registerForm: FormGroup;
   bsConfig: Partial<BsDatepickerConfig>;
-  
+
 
   constructor(private authService: AuthService,
     private alertify: AlertifyService,
