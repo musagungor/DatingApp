@@ -7,7 +7,7 @@ import { AuthGuard } from './_guards/auth.guard';
 import { AuthService } from './_services/auth.service';
 
 import { BrowserModule } from '@angular/platform-browser';
-import { BsDropdownModule, TabsModule, BsDatepickerModule, PaginationModule } from 'ngx-bootstrap';
+import { BsDropdownModule, TabsModule, BsDatepickerModule, PaginationModule, ButtonsModule } from 'ngx-bootstrap';
 
 import { ErrorInterceptorProvider } from './_services/error.interceptor';
 
@@ -70,6 +70,7 @@ export function tokenGetter() {
       TabsModule.forRoot(),
       RouterModule.forRoot(appRoutes),
       PaginationModule.forRoot(),
+      ButtonsModule.forRoot(),
       NgxGalleryModule,
       FileUploadModule,
       JwtModule.forRoot({
