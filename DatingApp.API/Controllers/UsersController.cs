@@ -8,6 +8,7 @@ using DatingApp.API.Dtos;
 using DatingApp.API.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace DatingApp.API.Controllers
 {
@@ -19,16 +20,21 @@ namespace DatingApp.API.Controllers
     {
         private readonly IDatingRepository _repository;
         private readonly IMapper _mapper;
+        private readonly ILogger<UsersController> _logger;
 
-        public UsersController(IDatingRepository repository, IMapper mapper)
+        public UsersController(IDatingRepository repository, 
+            IMapper mapper, 
+            ILogger<UsersController> logger)
         {   
             this._repository = repository;
             this._mapper = mapper;
+            this._logger = logger;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetUsersAsync([FromQuery]UserParams userParams)
         {
+             _logger.LogInformation("Get Users Async");
             var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
             var userFromRepo = await _repository.GetUserAsync(currentUserId);
             userParams.UserId = currentUserId;
@@ -49,6 +55,8 @@ namespace DatingApp.API.Controllers
         [HttpGet("{id}", Name ="GetUser")]
         public async Task<IActionResult> GetUserAsync(int id)
         {
+             _logger.LogInformation("Get User Async");
+
             var user = await _repository.GetUserAsync(id);
 
             var userToReturn = _mapper.Map<UserForDetailedDto>(user);
